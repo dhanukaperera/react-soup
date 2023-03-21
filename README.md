@@ -1,4 +1,7 @@
-# Website
+# React Soup
+
+This repo is about imported things I learned in React. Please note this is still WIP.
+
 
 This website is built using [Docusaurus 2](https://docusaurus.io/), a modern static website generator.
 
