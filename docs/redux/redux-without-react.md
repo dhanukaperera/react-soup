@@ -196,3 +196,130 @@ actions.add(1000)
 actions.increment()
 
 ```
+
+### Combined Reducers
+
+```javascript
+const initialSate = {
+	users : [
+		{ id:1, name : "Steve"}
+		{ id:2 	name : "Eric"}
+	],
+	tasks: [
+		{ title: "File the TPS reports"}
+		{ title: "Order more energy drinks"}
+	]
+};
+
+const ADD_USER = "ADD_USER";
+const ADD_TASK = "ADD_TASK";
+
+const addTask = (title) => ({title:ADD_TASK , payload: title})
+const addUser = (name) => ({type: ADD_TASK , payload: name})
+
+const userReducer = (users = initialSate.users , action) => {
+	if (action.type === ADD_USER) {
+		return [...users, action.payload]
+	}
+	return users;
+}
+
+const taskReducer = (tasks = initialSate.tasks, action) => {
+	if(action.type === ADD_TASK) {
+		return [...tasks, action.payload]
+	}
+	return tasks
+}
+
+const reducer = combineReducers({users:userReducer,task:taskReducer})
+
+const store = createStore(reducer);
+```
+
+
+### Enhancers
+
+Add additional functionality to a redux store. Redux dev tool is a enhancer. enhancer warp every single call to the monitorReducer. This feature useful when developing plugins. Role of Enhancers is like a middleware.
+
+Enhancers can use for many things, adding middleware, using the Redux DevTools, any kind of plugin that you wanna do or functionality that you need to add to Redux.
+
+```javascript
+const reducer = (state = {count :1}) => state;
+
+const monitorEnhancer = (createStore) => (reducer, initialState, enhancer) => {
+
+	const monitorReducer = (state, action) => {
+		const start = performance.now();
+		const newState = reducer(state,action)
+		const end = performance.now()
+		const diff = end - start;
+		console.log(diff)
+		return newState
+	}
+	return createStore(monitorReducer,initialState,enhancer )
+}
+
+
+const logEnhancer = (createStore) => (reducer, initialState, enhancer) => {
+		const logReducer = (state, action) => {
+			console.log('olf state',state, action)
+			const newState = reducer(state,action)
+			console.log('new state',newState, action)
+			return newState;
+		}
+
+		return createStore(logEnhancer,initialState,enhancer )
+	}
+
+// There is only 1 enhancer argument. logEnhancer?
+//const store = createStore(reducer, monitorEnhancer)
+
+// To pass multiple enhancer pass the compose function
+const store = createStore(reducer, compose(monitorEnhancer,logEnhancer))
+
+```
+### Apply Middleware
+
+applyMiddleware takes a whole bunch of different middleware and create one composed enhancer out of all that middleware.
+
+We use middleware to log customer behaviour to segment or something. middleware is really great way to modify how dispatching actions works in the application just as they flow thorough.
+
+use logging actions data reporting tools
+
+```javascript
+const logMiddleware = store => next => action => {
+	console.log('old state', store.getState(), action);
+	next(action)
+	console.log('new state', store.getState(), action);
+}
+
+const store = createStore(reducer, applyMiddleware(logMiddleware))
+```
+
+Redux Thunk is a usecase for the middleware.
+
+multiple pisces of middleware
+
+```javascript
+const logMiddleware = store => next => action => {
+	console.log('old state', store.getState(), action);
+	next(action)
+	console.log('new state', store.getState(), action);
+}
+
+// Snack is way to remember store => next => action => {}
+const monitorMiddlewareMiddleware = (store) => next => action => {
+	const start = performance,now();
+	next(action);
+	const end  = performance.now();
+	const diff = end - start;
+	console.log(diff);
+}
+
+const store = createStore(reducer, applyMiddleware(logMiddleware,monitorMiddlewareMiddleware))
+
+```
+
+Applying middleware is a abstraction over enhancers involves less boilerplate and is chainable out of all the middleware.
+
+A reducer is a pure function that takes two inputs and make on output.
