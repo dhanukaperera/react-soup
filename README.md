@@ -2,6 +2,7 @@
 
 This repo is about imported things I learned in React. Please note this is still WIP.
 
+This repo contatain notes about react and javascript
 
 This website is built using [Docusaurus 2](https://docusaurus.io/), a modern static website generator.
 
